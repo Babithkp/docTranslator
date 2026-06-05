@@ -8,13 +8,18 @@ import DocumentViewer from "./components/DocumentViewer";
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
-  const [translated, setTranslated] = useState(false);
+  // const [translated, setTranslated] = useState(false);
   const [translatedFile, setTranslatedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [lang, setLang] = useState("French");
 
   const translateDocx = async () => {
     if (!file) return;
+    if (
+      file.type !==
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+      return;
     setIsLoading(true);
 
     const formData = new FormData();
@@ -33,7 +38,7 @@ export default function Home() {
     setIsLoading(false);
   };
 
-  const downloadFileHander = () =>{
+  const downloadFileHander = () => {
     const url = URL.createObjectURL(translatedFile as Blob);
 
     const a = document.createElement("a");
@@ -45,7 +50,7 @@ export default function Home() {
     a.click();
 
     URL.revokeObjectURL(url);
-  }
+  };
 
   const handleFileUpload = async (selectedFile: File) => {
     setFile(selectedFile);
@@ -60,7 +65,7 @@ export default function Home() {
 
         <LanguageSelector setLang={setLang} />
 
-        <div className="flex justify-center gap-5 mt-5" >
+        <div className="flex justify-center gap-5 mt-5">
           {isLoading ? (
             "loading..."
           ) : (
@@ -71,7 +76,7 @@ export default function Home() {
               Translate Document
             </button>
           )}
-          
+
           <button
             className="rounded-xl border px-8 py-3 font-medium text-black"
             onClick={downloadFileHander}
