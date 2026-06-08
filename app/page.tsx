@@ -15,26 +15,56 @@ export default function Home() {
 
   const translateDocx = async () => {
     if (!file) return;
-    if (
-      file.type !==
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
-      return;
     setIsLoading(true);
+    if (
+      file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ) {
+      
 
-    const formData = new FormData();
+      const formData = new FormData();
 
-    formData.append("file", file);
+      formData.append("file", file);
 
-    formData.append("language", lang);
+      formData.append("language", lang);
 
-    const response = await fetch("/api/translate", {
-      method: "POST",
-      body: formData,
-    });
+      const response = await fetch("/api/translate", {
+        method: "POST",
+        body: formData,
+      });
 
-    const blob = await response.blob();
-    setTranslatedFile(blob as File);
+      const blob = await response.blob();
+      setTranslatedFile(blob as File);
+      
+    } else {
+      console.log("pdf");
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/pdf-to-docx", {
+        method: "POST",
+        body: formData,
+      });
+
+      console.log("pdf-to-docx");
+      
+
+      const blob = await response.blob();
+
+      const formData1 = new FormData();
+
+      formData1.append("file", blob);
+
+      formData1.append("language", lang);
+
+      const transResponse = await fetch("/api/translate", {
+        method: "POST",
+        body: formData1,
+      });
+
+      const blob1 = await transResponse.blob();
+      setTranslatedFile(blob1 as File);
+    }
     setIsLoading(false);
   };
 
