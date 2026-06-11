@@ -17,7 +17,7 @@ export default function Home() {
     const languageMap: Record<string, string> = {
       English: "EN-US",
       French: "FR",
-      Spanish: "ES",
+      German: "DE",
       Dutch: "NL",
     };
 
