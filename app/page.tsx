@@ -13,6 +13,17 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [lang, setLang] = useState("French");
 
+  const getTargetLang = () => {
+    const languageMap: Record<string, string> = {
+      English: "EN-US",
+      French: "FR",
+      Spanish: "ES",
+      Dutch: "NL",
+    };
+  
+    return languageMap[lang] || "EN-US";
+  };
+
   const translateDocx = async () => {
     if (!file) return;
     setIsLoading(true);
@@ -20,13 +31,11 @@ export default function Home() {
       file.type ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
-      
-
       const formData = new FormData();
 
       formData.append("file", file);
-
-      formData.append("language", lang);
+      const targetLang = getTargetLang();
+      formData.append("language", targetLang);
 
       const response = await fetch("/api/translate", {
         method: "POST",
@@ -35,36 +44,49 @@ export default function Home() {
 
       const blob = await response.blob();
       setTranslatedFile(blob as File);
-      
     } else {
-      console.log("pdf");
       const formData = new FormData();
-      formData.append("file", file);
 
-      const response = await fetch("/api/pdf-to-docx", {
+      formData.append("file", file);
+      formData.append("targetLang", lang);
+
+      const response = await fetch("/api/translate-pdf", {
         method: "POST",
         body: formData,
       });
 
-      console.log("pdf-to-docx");
-      
-
       const blob = await response.blob();
 
-      const formData1 = new FormData();
+      setTranslatedFile(blob as File);
 
-      formData1.append("file", blob);
-
-      formData1.append("language", lang);
-
-      const transResponse = await fetch("/api/translate", {
-        method: "POST",
-        body: formData1,
-      });
-
-      const blob1 = await transResponse.blob();
-      setTranslatedFile(blob1 as File);
     }
+
+    // else {
+
+    //   const formData = new FormData();
+    //   formData.append("file", file);
+
+    //   const response = await fetch("/api/pdf-to-docx", {
+    //     method: "POST",
+    //     body: formData,
+    //   });
+
+    //   const blob = await response.blob();
+
+    //   const formData1 = new FormData();
+
+    //   formData1.append("file", blob);
+
+    //   formData1.append("language", lang);
+
+    //   const transResponse = await fetch("/api/translate", {
+    //     method: "POST",
+    //     body: formData1,
+    //   });
+
+    //   const blob1 = await transResponse.blob();
+    //   setTranslatedFile(blob1 as File);
+    // }
     setIsLoading(false);
   };
 
@@ -107,12 +129,14 @@ export default function Home() {
             </button>
           )}
 
-          <button
-            className="rounded-xl border px-8 py-3 font-medium text-black"
-            onClick={downloadFileHander}
-          >
-            Download Translation
-          </button>
+          {translatedFile && (
+            <button
+              className="rounded-xl border px-8 py-3 font-medium text-black"
+              onClick={downloadFileHander}
+            >
+              Download Translation
+            </button>
+          )}
         </div>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-2 text-black">

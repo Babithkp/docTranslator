@@ -232,9 +232,9 @@ export async function POST(
         replaceParagraphText(
           paragraph,
           translatedTexts[
-            index
+          index
           ] ??
-            paragraph.text
+          paragraph.text
         );
       }
     );

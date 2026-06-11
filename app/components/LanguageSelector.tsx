@@ -14,6 +14,7 @@ export default function LanguageSelector({
         <option value={"French"}>French</option>
         <option value={"Dutch"}>Dutch</option>
         <option value={"German"}>German</option>
+        <option value={"English"}>English</option>
       </select>
     </div>
   );
