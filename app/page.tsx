@@ -20,22 +20,25 @@ export default function Home() {
       Spanish: "ES",
       Dutch: "NL",
     };
-  
+
     return languageMap[lang] || "EN-US";
   };
+
+  const isDocx =
+    !!file &&
+    (file.type ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      file.name.toLowerCase().endsWith(".docx"));
 
   const translateDocx = async () => {
     if (!file) return;
     setIsLoading(true);
-    if (
-      file.type ===
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ) {
+    if (isDocx) {
       const formData = new FormData();
 
       formData.append("file", file);
-      const targetLang = getTargetLang();
-      formData.append("language", targetLang);
+
+      formData.append("language", lang);
 
       const response = await fetch("/api/translate", {
         method: "POST",
@@ -43,12 +46,20 @@ export default function Home() {
       });
 
       const blob = await response.blob();
-      setTranslatedFile(blob as File);
+      const translatedFile = new File(
+        [blob],
+        `translated.${file.name.split(".").pop()}`,
+        {
+          type: blob.type,
+        },
+      );
+      setTranslatedFile(translatedFile);
     } else {
       const formData = new FormData();
 
       formData.append("file", file);
-      formData.append("targetLang", lang);
+      const targetLang = getTargetLang();
+      formData.append("targetLang", targetLang);
 
       const response = await fetch("/api/translate-pdf", {
         method: "POST",
@@ -57,36 +68,15 @@ export default function Home() {
 
       const blob = await response.blob();
 
-      setTranslatedFile(blob as File);
+      const url = window.URL.createObjectURL(blob);
 
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `translated-${lang}.pdf`; 
+      a.click();
+
+      setFile(null)
     }
-
-    // else {
-
-    //   const formData = new FormData();
-    //   formData.append("file", file);
-
-    //   const response = await fetch("/api/pdf-to-docx", {
-    //     method: "POST",
-    //     body: formData,
-    //   });
-
-    //   const blob = await response.blob();
-
-    //   const formData1 = new FormData();
-
-    //   formData1.append("file", blob);
-
-    //   formData1.append("language", lang);
-
-    //   const transResponse = await fetch("/api/translate", {
-    //     method: "POST",
-    //     body: formData1,
-    //   });
-
-    //   const blob1 = await transResponse.blob();
-    //   setTranslatedFile(blob1 as File);
-    // }
     setIsLoading(false);
   };
 
